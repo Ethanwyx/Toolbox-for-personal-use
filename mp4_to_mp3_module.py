@@ -1,62 +1,62 @@
-﻿import tkinter as tk
-from tkinter import *
-from tkinter.ttk import *
-from tkinter import filedialog, messagebox
-from moviepy.video.io.VideoFileClip import VideoFileClip
+﻿
+# mp4_to_mp3_module.py
+
 import os
+from PySide6.QtCore import QThread, Signal
+from PySide6.QtWidgets import QFileDialog, QMessageBox
+from moviepy.video.io.VideoFileClip import VideoFileClip
+
+class MP4ToMP3Worker(QThread):
+    progress_signal = Signal(int)           # 总进度 0~100
+    finished_signal = Signal(list, list)   # 成功文件列表, 失败文件列表
+
+    def __init__(self, file_list):
+        super().__init__()
+        self.file_list = file_list
+
+    def run(self):
+        success_files = []
+        fail_files = []
+
+        total_files = len(self.file_list)
+        for idx, input_file in enumerate(self.file_list, 1):
+            input_file = input_file.strip()
+            if not os.path.isfile(input_file):
+                fail_files.append(f"{input_file} (文件不存在)")
+                self.progress_signal.emit(int(idx / total_files * 100))
+                continue
+
+            try:
+                video = VideoFileClip(input_file)
+                mp3_path = os.path.splitext(input_file)[0] + ".mp3"
+                video.audio.write_audiofile(mp3_path)  # 只保留输出路径
+                video.close()
+                success_files.append(mp3_path)
+            except Exception as e:
+                fail_files.append(f"{input_file} ({e})")
+
+            self.progress_signal.emit(int(idx / total_files * 100))
+
+        self.finished_signal.emit(success_files, fail_files)
 
 class MP4ToMP3Module:
-    def __init__(self, parent):
-        self.frame = tk.Frame(parent)
-
-        tk.Label(self.frame, text="MP4 转 MP3", font=("Arial", 14)).pack(pady=10)
-
-        btn_select = tk.Button(self.frame, text="选择 MP4 文件(可多选)", command=self.select_files)
-        btn_select.pack(pady=5)
-
-        self.entry_files = tk.Entry(self.frame, width=60)
-        self.entry_files.pack(pady=5)
-
-        btn_convert = tk.Button(self.frame, text="开始转换", command=self.convert)
-        btn_convert.pack(pady=10)
+    def __init__(self, parent_widget):
+        self.parent = parent_widget
+        self.worker = None
 
     def select_files(self):
-        files = filedialog.askopenfilenames(
-            title="选择 MP4 文件",
-            filetypes=[("MP4 文件", "*.mp4"), ("所有文件", "*.*")]
+        file_paths, _ = QFileDialog.getOpenFileNames(
+            self.parent,
+            "选择 MP4 文件",
+            "",
+            "MP4 文件 (*.mp4);;所有文件 (*.*)"
         )
-        if files:
-            self.entry_files.delete(0, tk.END)
-            self.entry_files.insert(0, ";".join(files))
+        return file_paths
 
-    def convert(self):
-        input_files = self.entry_files.get().strip()
-        if not input_files:
-            messagebox.showwarning("提示", "请先选择至少一个 MP4 文件！")
-            return
-
-        file_list = input_files.split(";")
-        success = 0
-        failed = []
-
-        for f in file_list:
-            f = f.strip()
-            if not os.path.isfile(f):
-                failed.append(f"{f} (文件不存在)")
-                continue
-            try:
-                video = VideoFileClip(f)
-                mp3_path = os.path.splitext(f)[0] + ".mp3"
-                video.audio.write_audiofile(mp3_path)
-                video.close()
-                success += 1
-            except Exception as e:
-                failed.append(f"{f} ({e})")
-
-        msg = f"转换完成！成功：{success} 个\n失败：{len(failed)} 个"
-        if failed:
-            msg += "\n失败文件：\n" + "\n".join(failed)
-        messagebox.showinfo("结果", msg)
-
-    def get_frame(self):
-        return self.frame
+    def convert_files(self, file_list, progress_callback=None, finished_callback=None):
+        self.worker = MP4ToMP3Worker(file_list)
+        if progress_callback:
+            self.worker.progress_signal.connect(progress_callback)
+        if finished_callback:
+            self.worker.finished_signal.connect(finished_callback)
+        self.worker.start()

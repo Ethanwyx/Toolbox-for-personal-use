@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>522</width>
+    <height>303</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>工具箱</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item alignment="Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter">
+     <widget class="QListWidget" name="menuList">
+      <item>
+       <property name="text">
+        <string>字幕转纯文本</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>MP4 转 MP3</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="page_subtitle">
+       <layout class="QVBoxLayout" name="verticalLayout_subtitle">
+        <item>
+         <widget class="QPushButton" name="btn_select_subtitle">
+          <property name="text">
+           <string>选择字幕文件</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignVCenter">
+         <widget class="QTextEdit" name="txt_output_subtitle"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_select_output_subtitle">
+          <property name="text">
+           <string>选择输出路径</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_convert_subtitle">
+          <property name="text">
+           <string>转换</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_mp4">
+       <layout class="QVBoxLayout" name="verticalLayout_mp4">
+        <item>
+         <widget class="QPushButton" name="btn_select_mp4">
+          <property name="text">
+           <string>选择 MP4 文件</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignVCenter">
+         <widget class="QTextEdit" name="txt_output_mp4"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_select_output_mp3">
+          <property name="text">
+           <string>选择输出路径</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_convert_mp4">
+          <property name="text">
+           <string>转换</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignmentFlag::AlignVCenter">
+         <widget class="QProgressBar" name="progress_mp4">
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

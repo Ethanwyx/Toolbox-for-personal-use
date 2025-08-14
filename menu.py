@@ -1,44 +1,101 @@
-﻿# main_app.py
-import tkinter as tk
-from tkinter import *
-from tkinter.ttk import *
+﻿# menu.py
+import sys
+from PySide6 import QtWidgets
 from subtitle_module import SubtitleToTextModule
 from mp4_to_mp3_module import MP4ToMP3Module
+from ui_toolbox import Ui_MainWindow  # 这是 pyside6-uic 生成的 Python 文件
 
-class MainApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("自用工具箱")
-        self.root.geometry("700x500")
+class ToolboxApp(QtWidgets.QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)  # 把 UI 加载到 QMainWindow
+        self.subtitle_file = None
+        self.mp4_files = []  # 支持多文件
 
-        self.menu_frame = tk.Frame(root, width=150)
-        self.menu_frame.pack(side=tk.LEFT, fill=tk.Y)
+        # 将模块实例化为主窗口属性，防止线程被回收
+        self.mp4_module = MP4ToMP3Module(self)
 
-        self.content_frame = tk.Frame(root)
-        self.content_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.bind_events()
 
-        # 导入模块实例
-        self.modules = {
-            "字幕转纯文本": SubtitleToTextModule(self.content_frame),
-            "MP4 转 MP3": MP4ToMP3Module(self.content_frame),
-            # 此处可扩展其他模块
-        }
+    # ---------------- 绑定按钮事件 ----------------
+    def bind_events(self):
+        # 左侧菜单切换
+        self.ui.menuList.currentRowChanged.connect(self.ui.stackedWidget.setCurrentIndex)
 
-        for i, name in enumerate(self.modules):
-            btn = tk.Button(self.menu_frame, text=name, command=lambda n=name: self.show_module(n))
-            btn.pack(fill=tk.X, pady=2, padx=5)
+        # 字幕模块
+        self.ui.btn_select_subtitle.clicked.connect(self.select_subtitle_file)
+        self.ui.btn_convert_subtitle.clicked.connect(self.convert_subtitle)
 
-        self.current_module = None
-        self.show_module("字幕转纯文本")
-        self.show_module("MP4 转 MP3")
+        # MP4模块
+        self.ui.btn_select_mp4.clicked.connect(self.select_mp4_files)
+        self.ui.btn_convert_mp4.clicked.connect(self.convert_mp4)
 
-    def show_module(self, name):
-        if self.current_module:
-            self.current_module.get_frame().pack_forget()
-        self.current_module = self.modules[name]
-        self.current_module.get_frame().pack(fill=tk.BOTH, expand=True)
+    # ---------------- 字幕模块 ----------------
+    def select_subtitle_file(self):
+        module = SubtitleToTextModule(self)
+        files = module.select_files()
+        if files:
+            self.subtitle_file = files[0]
+            self.ui.txt_output_subtitle.clear()
+            self.ui.txt_output_subtitle.append(f"选中的字幕文件: {self.subtitle_file}")
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = MainApp(root)
-    root.mainloop()
+    def convert_subtitle(self):
+        if not self.subtitle_file:
+            self.ui.txt_output_subtitle.append("请先选择字幕文件 ⚠️")
+            return
+
+        module = SubtitleToTextModule(self)
+        success_files, fail_files = module.convert_files([self.subtitle_file])
+
+        self.ui.txt_output_subtitle.clear()
+
+        if success_files:
+            for f in success_files:
+                self.ui.txt_output_subtitle.append(f"生成文件: {f}")
+            self.ui.txt_output_subtitle.append("字幕转文本完成 ✅")
+
+        if fail_files:
+            for f in fail_files:
+                self.ui.txt_output_subtitle.append(f"失败文件: {f}")
+            self.ui.txt_output_subtitle.append("字幕转文本失败 ❌\n当前仅支持UTF-8编码！")
+
+    # ---------------- MP4模块 ----------------
+    def select_mp4_files(self):
+        files = self.mp4_module.select_files()
+        if files:
+            self.mp4_files = files
+            self.ui.txt_output_mp4.clear()
+            self.ui.txt_output_mp4.append("选中的 MP4 文件:")
+            for f in files:
+                self.ui.txt_output_mp4.append(f)
+            self.ui.progress_mp4.setValue(0)
+
+    def convert_mp4(self):
+        if not self.mp4_files:
+            self.ui.txt_output_mp4.append("请先选择 MP4 文件 ⚠️")
+            return
+
+        self.ui.progress_mp4.setValue(0)
+
+        def update_progress(percent):
+            self.ui.progress_mp4.setValue(percent)
+
+        def on_finished(success_files, fail_files):
+            self.ui.txt_output_mp4.clear()
+            for f in success_files:
+                self.ui.txt_output_mp4.append(f"生成文件: {f}")
+            for f in fail_files:
+                self.ui.txt_output_mp4.append(f"失败文件: {f}")
+            self.ui.progress_mp4.setValue(100)
+
+        # 使用主窗口属性的模块实例，保证线程不被回收
+        # 移除不存在的 use_moviepy_progress 参数
+        self.mp4_module.convert_files(self.mp4_files, progress_callback=update_progress, finished_callback=on_finished)
+
+
+if __name__ == '__main__':
+    app = QtWidgets.QApplication(sys.argv)
+    window = ToolboxApp()
+    window.show()
+    sys.exit(app.exec())

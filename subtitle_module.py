@@ -1,30 +1,22 @@
-﻿# subtitle_module.py
+﻿
+# subtitle_module.py
 
-import tkinter as tk
-from tkinter import *
-from tkinter.ttk import *
-import re
 import os
-from tkinter import filedialog, messagebox
+import re
+from PySide6.QtWidgets import QFileDialog, QMessageBox
 
 class SubtitleToTextModule:
-    def __init__(self, parent):
-        self.frame = tk.Frame(parent)
+    def __init__(self, parent_widget):
+        # parent_widget: QWidget，用于 QFileDialog、QMessageBox
+        self.parent = parent_widget
 
-        tk.Label(self.frame, text="字幕文件转纯文字", font=("Arial", 14)).pack(pady=10)
-
-        self.entry_files = tk.Entry(self.frame, width=60)
-        self.entry_files.pack(pady=5)
-
-        btn_select = tk.Button(self.frame, text="选择 srt 文件(可多选)", command=self.select_files)
-        btn_select.pack(pady=5)
-
-        btn_convert = tk.Button(self.frame, text="开始转换", command=self.convert)
-        btn_convert.pack(pady=10)
-
+    # 核心转换逻辑
     def subtitle_to_text(self, input_file, output_file):
-        with open(input_file, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
+        try:
+            with open(input_file, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+        except UnicodeDecodeError:
+            raise UnicodeDecodeError(f"{input_file} 不是 UTF-8 编码")
 
         text_lines = []
         for line in lines:
@@ -41,46 +33,42 @@ class SubtitleToTextModule:
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write('\n'.join(text_lines))
 
+    # 选择文件
     def select_files(self):
-        file_paths = filedialog.askopenfilenames(
-            title="选择字幕文件",
-            filetypes=(("字幕文件", "*.srt *.vtt"), ("所有文件", "*.*"))
+        file_paths, _ = QFileDialog.getOpenFileNames(
+            self.parent,
+            "选择字幕文件",
+            "",
+            "字幕文件 (*.srt *.vtt);;所有文件 (*.*)"
         )
-        if file_paths:
-            self.entry_files.delete(0, tk.END)
-            self.entry_files.insert(0, ";".join(file_paths))
+        return file_paths
 
-    def convert(self):
-        input_files = self.entry_files.get().strip()
-        if not input_files:
-            messagebox.showwarning("提示", "请先选择至少一个字幕文件！")
-            return
-
-        file_list = input_files.split(";")
-        success_count = 0
-        fail_count = 0
+    # 转换文件列表
+    def convert_files(self, file_list):
+        success_files = []
         fail_files = []
 
         for input_file in file_list:
             input_file = input_file.strip()
             if not os.path.isfile(input_file):
-                fail_count += 1
-                fail_files.append(input_file)
+                fail_files.append(f"{input_file} (文件不存在)")
                 continue
 
             output_file = os.path.splitext(input_file)[0] + ".txt"
             try:
                 self.subtitle_to_text(input_file, output_file)
-                success_count += 1
+                success_files.append(output_file)
             except Exception as e:
-                fail_count += 1
                 fail_files.append(f"{input_file} ({e})")
 
-        msg = f"转换完成！\n成功：{success_count} 个\n失败：{fail_count} 个"
-        if fail_count > 0:
-            msg += "\n失败文件：\n" + "\n".join(fail_files)
+        # 弹窗显示结果（可选）
+        if self.parent:
+            msg = ""
+            if success_files:
+                msg += f"成功转换：{len(success_files)} 个\n"
+            if fail_files:
+                msg += f"失败：{len(fail_files)} 个\n失败文件:\n" + "\n".join(fail_files)
+            if msg:
+                QMessageBox.information(self.parent, "转换结果", msg)
 
-        messagebox.showinfo("结果", msg)
-
-    def get_frame(self):
-        return self.frame
+        return success_files, fail_files
