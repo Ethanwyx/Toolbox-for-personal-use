@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>780</width>
+    <height>520</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>工具箱</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_root">
+    <property name="spacing">
+     <number>8</number>
+    </property>
+    <property name="contentsMargins">
+     <rect><x>8</x><y>8</y><width>8</width><height>8</height></rect>
+    </property>
+    <item>
+     <widget class="QListWidget" name="menuList">
+      <property name="minimumWidth">
+       <number>160</number>
+      </property>
+      <property name="maximumWidth">
+       <number>220</number>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch><verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <item>
+       <property name="text">
+        <string>字幕转纯文本</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>弹幕提取文本</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>MP4 转 MP3</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+
+      <!-- 页：字幕转纯文本 -->
+      <widget class="QWidget" name="page_subtitle">
+       <layout class="QVBoxLayout" name="verticalLayout_subtitle">
+        <property name="spacing"><number>8</number></property>
+        <item>
+         <widget class="QPushButton" name="btn_select_subtitle">
+          <property name="text"><string>选择字幕文件</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTextEdit" name="txt_output_subtitle">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch><verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="placeholderText">
+           <string>这里显示处理日志 / 结果</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_select_output_subtitle">
+          <property name="text"><string>选择输出路径</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_convert_subtitle">
+          <property name="text"><string>转换</string></property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+
+      <!-- 页：弹幕提取文本（改为布局版本） -->
+      <widget class="QWidget" name="page_danmu">
+       <layout class="QVBoxLayout" name="verticalLayout_danmu">
+        <property name="spacing"><number>8</number></property>
+        <item>
+         <widget class="QPushButton" name="btn_select_danmu">
+          <property name="text"><string>选择弹幕文件</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTextEdit" name="txt_output_danmu">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch><verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="placeholderText">
+           <string>这里显示提取的弹幕或处理日志</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_select_output_danmu">
+          <property name="text"><string>选择输出路径</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_convert_danmu">
+          <property name="text"><string>转换</string></property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+
+      <!-- 页：MP4 转 MP3 -->
+      <widget class="QWidget" name="page_mp4">
+       <layout class="QVBoxLayout" name="verticalLayout_mp4">
+        <property name="spacing"><number>8</number></property>
+        <item>
+         <widget class="QPushButton" name="btn_select_mp4">
+          <property name="text"><string>选择 MP4 文件</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTextEdit" name="txt_output_mp4">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch><verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="placeholderText">
+           <string>这里显示处理日志 / 结果</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_select_output_mp3">
+          <property name="text"><string>选择输出路径</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_convert_mp4">
+          <property name="text"><string>转换</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProgressBar" name="progress_mp4">
+          <property name="value"><number>0</number></property>
+          <property name="textVisible"><bool>true</bool></property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
