@@ -8,3 +8,6 @@ The original source code of the entire program has been added. This program incl
 - Migrated the UI from Tkinter to PySide6 for a cleaner and more flexible interface.  
 - Integrated subtitle-to-text and MP4-to-MP3 modules with progress bars and proper error handling.  
 - Fixed bugs related to file selection, encoding, and MoviePy parameter compatibility.  
+
+Aug 20 2025  
+Added the "bullet screen" module and refactored the UI file
